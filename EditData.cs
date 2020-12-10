@@ -20,7 +20,7 @@ namespace AeroMaterialHandlingDatabaseApplication
         protected bool validData;
         string path;
         protected Image image;
-        protected Thread getImageThread;        
+        protected Thread getImageThread;
         public fEditPage()
         {
             InitializeComponent();
@@ -34,7 +34,7 @@ namespace AeroMaterialHandlingDatabaseApplication
             this.lbDragDrop.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbDragDrop_DragDrop);
             this.lbDragDrop.DragEnter += new System.Windows.Forms.DragEventHandler(this.lbDragDrop_DragEnter);
         }
-                        
+
         private bool GetFilename(out string filename, DragEventArgs e)
         {
             //This code reads the file extension of the image being dropped into picture box (pbRegister)
@@ -70,21 +70,21 @@ namespace AeroMaterialHandlingDatabaseApplication
         }
 
         private void btSave_Click(object sender, EventArgs e)
-        {       
+        {
             lbTagList.Items.Add(tbEditAddTags);
 
             //Establishing a connection to the database to enter new entry data.
-            OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\\Users\\pc\\OneDrive\\Aero_Material_Handling.accdb");
+            OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\\School\\Capstone\\Repository\\AMHDataBase\\Aero_Material_Handling.accdb");
             OleDbCommand cmd = new OleDbCommand("select AMH_Entries.entryTitle, AMH_Entries.entryDescShort, AMH_Entries.entryDescLong, AMH_Tags.tagName, AMH_Attachments.attachmentFile " +
                                                 "from(AMH_Tags inner join(AMH_Entries inner join AMH_Tag_Entry on AMH_Entries.entryID = AMH_Tag_Entry.entryID) on AMH_Tags.tagID = AMH_Tag_Entry.tagID) " +
                                                 "inner join(AMH_Attachments inner join AMH_Attachment_Entry on AMH_Attachments.attachmentID = AMH_Attachment_Entry.attachmentID) " +
-                                                "on AMH_Entries.entryID = AMH_Attachment_Entry.entryID where entryTitle = @entryTitle", con);  
-            
+                                                "on AMH_Entries.entryID = AMH_Attachment_Entry.entryID where entryTitle = @entryTitle", con);
+
             cmd.Parameters.AddWithValue("@entryTitle", tbEditTitle.Text.ToLower());
             cmd.Parameters.AddWithValue("@entryDescShort", tbEditShortDesc.Text.ToLower());
             cmd.Parameters.AddWithValue("@entryDescLong", tbEditLongDesc.Text.ToLower());
             cmd.Parameters.AddWithValue("@tagName", lbTagList.Items.ToString());
-                                   
+
             con.Open();
             OleDbDataReader dr = cmd.ExecuteReader();
             try
@@ -108,30 +108,21 @@ namespace AeroMaterialHandlingDatabaseApplication
                     cmd.Parameters.AddWithValue("@entryDescShort", tbEditShortDesc.Text);
                     cmd.Parameters.AddWithValue("@entryDescLong", tbEditLongDesc.Text);
                     cmd.ExecuteNonQuery();
-                    
-                    for (int x = 0; x < lbTagList.Items.Count -1; x++)
+
+                    for (int x = 0; x < lbTagList.Items.Count - 1; x++)
                     {
                         cmd = new OleDbCommand("insert into AMH_Tags(tagName) values(@tagName)", con);
-                        cmd.Parameters.AddWithValue("@tagName", lbTagList.Items[x]); 
+                        cmd.Parameters.AddWithValue("@tagName", lbTagList.Items[x]);
                         cmd.ExecuteNonQuery();
                     }
 
-                    for (int x = 0; x < lbDragDrop.Items.Count -1; x++)
+                    for (int x = 0; x < lbDragDrop.Items.Count - 1; x++)
                     {
                         cmd = new OleDbCommand("insert into AMH_Attachments(AttachmentFile) values(@attachmentFile)", con);
                         cmd.Parameters.AddWithValue("@attachmentFile", lbDragDrop.Items[x]);
                         cmd.ExecuteNonQuery();
                     }
 
-                    con.Close();
-                    MessageBox.Show("Entry saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    tbEditAddTags.Clear();
-                    tbEditLongDesc.Clear();
-                    tbEditShortDesc.Clear();
-                    tbEditTitle.Clear();
-                    lbTagList.Items.Clear();
-                    lbDragDrop.Items.Clear();
-                    
                 }
             }
             catch (Exception)
@@ -140,11 +131,62 @@ namespace AeroMaterialHandlingDatabaseApplication
             }
             finally
             {
-                
+                MessageBox.Show("Entry saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
             }
 
+            string currentEntryID = "";
+            string currentTagID = "";
+            try
+            {
+                con.Close();
+                con.Open();
+                //get the most recent title entered and store it
+                cmd = new OleDbCommand("Select LAST(entryID) FROM(AMH_Entries)", con);
+                OleDbDataReader read = cmd.ExecuteReader();
+
+                while (read.Read())
+                {
+                    //Store the most current entryID
+                    currentEntryID = read.GetValue(0).ToString();
+                }
+
+                con.Close();
+            }
+            catch(Exception err)
+            {
+                MessageBox.Show(err.ToString());
+            }
+            if (con.State == ConnectionState.Open)
+                con.Close();
+
+            con.Open();
+            //loop through all the tags and save them with the entryID
+            for (int x = 0; x < lbTagList.Items.Count - 1; x++)
+            {
+                currentTagID = lbTagList.Items[x].ToString();
+                MessageBox.Show(currentTagID);
+                try
+                {
+                    cmd = new OleDbCommand("INSERT INTO AMH_Tag_Entry(tagID) Values('" + currentTagID + "', '" + currentEntryID + "'", con);
+                }
+                catch (Exception err)
+                {
+                    MessageBox.Show(err.ToString());
+                }
+            }
+
+            tbEditAddTags.Clear();
+            tbEditLongDesc.Clear();
+            tbEditShortDesc.Clear();
+            tbEditTitle.Clear();
+            lbTagList.Items.Clear();
+            lbDragDrop.Items.Clear();
+            if (con.State == ConnectionState.Open)
+                con.Close();
+            this.Close();
         }
-        
+
         private void btClear_Click(object sender, EventArgs e)
         {
             tbEditAddTags.Clear();
@@ -154,11 +196,11 @@ namespace AeroMaterialHandlingDatabaseApplication
             lbTagList.Items.Clear();
             pbRegister.Image = null;
         }
-        
+
         private void btExit_Click(object sender, EventArgs e)
         {
             this.Close();
-            
+
 
         }
 
@@ -174,7 +216,7 @@ namespace AeroMaterialHandlingDatabaseApplication
 
         private void fEditPage_Load(object sender, EventArgs e)
         {
-           
+
 
         }
 
@@ -190,7 +232,7 @@ namespace AeroMaterialHandlingDatabaseApplication
 
         private void btEditAdd_Click(object sender, EventArgs e)
         {
-            
+
         }
 
         private void btTagAdd_Click(object sender, EventArgs e)
@@ -235,14 +277,14 @@ namespace AeroMaterialHandlingDatabaseApplication
             string currentTag = tbEditAddTags.Text;
             lbTagList.Items.Add(currentTag);
 
-            tbEditAddTags.Clear(); 
+            tbEditAddTags.Clear();
             tbEditAddTags.Focus();
 
-            
+
         }
 
         private void btEditAddImage_Click(object sender, EventArgs e)
-        {           
+        {
             //Establishing a connection to the database to enter new attachment data
             //OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\\Users\\pc\\OneDrive\\Aero_Material_Handling.accdb");
             //OleDbCommand cmd = new OleDbCommand("select * from AMH_Attachments where attachmentFile=@attachmentFile", con);
@@ -283,12 +325,12 @@ namespace AeroMaterialHandlingDatabaseApplication
 
         private void groupBox1_Enter(object sender, EventArgs e)
         {
-           
+
         }
 
         private void tbEditAddTags_Enter(object sender, EventArgs e)
         {
-            
+
 
         }
 
@@ -343,9 +385,9 @@ namespace AeroMaterialHandlingDatabaseApplication
         {
             image = new Bitmap(path);
         }
-              
+
         private void lbDragDrop_DragDrop(object sender, DragEventArgs e)
-        {            
+        {
             string[] s = (string[])e.Data.GetData(DataFormats.FileDrop, false);
             int i;
             for (i = 0; i < s.Length; i++)
@@ -371,7 +413,7 @@ namespace AeroMaterialHandlingDatabaseApplication
 
         private void gbDragDrop_Enter(object sender, EventArgs e)
         {
-            
+
         }
     }
 }

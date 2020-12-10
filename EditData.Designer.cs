@@ -262,16 +262,6 @@
             this.lbTagList.Size = new System.Drawing.Size(206, 69);
             this.lbTagList.TabIndex = 49;
             // 
-            // pbLogo
-            // 
-            this.pbLogo.Image = global::AeroMaterialHandlingDatabaseApplication.Properties.Resources.LOGO_DARK_GRAY;
-            this.pbLogo.Location = new System.Drawing.Point(88, 394);
-            this.pbLogo.Name = "pbLogo";
-            this.pbLogo.Size = new System.Drawing.Size(164, 139);
-            this.pbLogo.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
-            this.pbLogo.TabIndex = 50;
-            this.pbLogo.TabStop = false;
-            // 
             // pbRegister
             // 
             this.pbRegister.BackColor = System.Drawing.SystemColors.ControlDarkDark;

@@ -7,15 +7,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Data.OleDb;
 
 namespace AeroMaterialHandlingDatabaseApplication
 {
     public partial class ListItem : UserControl
     {
-        OleDbConnection con = new OleDbConnection("Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\\Users\\pc\\OneDrive\\Aero_Material_Handling.accdb");
-
-
         public ListItem()
         {
             InitializeComponent();
@@ -32,7 +28,7 @@ namespace AeroMaterialHandlingDatabaseApplication
         //Populate the text boxes with data from the data base
 
         public string Title
-        {         
+        {
             get { return _title; }
             set { _title = value; lblTitleListItem.Text = value; }//change value to a place withing the database
         }
@@ -60,14 +56,14 @@ namespace AeroMaterialHandlingDatabaseApplication
 
         }
 
-        private void lblTitleListItem_Click(object sender, EventArgs e)
+        private void pbPictureListItem_DoubleClick(object sender, EventArgs e)
         {
-           
+
         }
 
-        private void pbPictureListItem_Click(object sender, EventArgs e)
+        private void ListItem_Click(object sender, EventArgs e)
         {
-
+            
         }
     }
 }
