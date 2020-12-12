@@ -134,9 +134,9 @@ namespace AeroMaterialHandlingDatabaseApplication
                 MessageBox.Show("Entry saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
             }
-
+            
+            //this code will get entryID and tagID then insert them into associative table
             string currentEntryID = "";
-            string currentTagID = "";
             try
             {
                 con.Close();
@@ -160,15 +160,41 @@ namespace AeroMaterialHandlingDatabaseApplication
             if (con.State == ConnectionState.Open)
                 con.Close();
 
+            //get tags from last entry
+            string[] curTagID = new string[lbTagList.Items.Count];
+            try
+            {
+                con.Close();
+                con.Open();
+                //get the most recent title entered and store it
+                for (int i = 0; i <= lbTagList.Items.Count - 1; i++)
+                {
+                    cmd = new OleDbCommand("Select (tagID) FROM(AMH_Tags) WHERE tagName = '" + lbTagList.Items[i] + "'", con);
+                    OleDbDataReader read = cmd.ExecuteReader();
+
+                    while(read.Read())
+                    {
+                        curTagID[i] = read.GetValue(0).ToString();
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                MessageBox.Show(err.ToString());
+            }
+
+            con.Close();
             con.Open();
             //loop through all the tags and save them with the entryID
             for (int x = 0; x < lbTagList.Items.Count - 1; x++)
             {
-                currentTagID = lbTagList.Items[x].ToString();
-                MessageBox.Show(currentTagID);
                 try
                 {
-                    cmd = new OleDbCommand("INSERT INTO AMH_Tag_Entry(tagID) Values('" + currentTagID + "', '" + currentEntryID + "'", con);
+
+                    cmd = new OleDbCommand("INSERT INTO AMH_Tag_Entry(tagID, entryID) Values(@tagID, @entryID)", con);
+                    cmd.Parameters.AddWithValue("@tagID", curTagID[x]);
+                    cmd.Parameters.AddWithValue("@entryID", currentEntryID);
+                    cmd.ExecuteNonQuery();
                 }
                 catch (Exception err)
                 {
