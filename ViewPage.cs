@@ -26,8 +26,24 @@ namespace AeroMaterialHandlingDatabaseApplication
 
         private void ViewPage_Load(object sender, EventArgs e)
         {
-
-
+            //Pulls entryTitle and tagName from database and adds it to the searchbar autocomplete collection.
+            OleDbConnection con = new OleDbConnection(@"Provider = Microsoft.ACE.OLEDB.12.0; Data Source=D:\\School\\Capstone\\Repository\\AMHDataBase\\Aero_Material_Handling.accdb");
+            string accessQuery = "select AMH_Entries.entryTitle, AMH_Tags.tagName " +
+                                 "from AMH_Tags inner join(AMH_Entries inner join AMH_Tag_Entry on AMH_Entries.entryID = AMH_Tag_Entry.entryID) " +
+                                 "on AMH_Tags.tagID = AMH_Tag_Entry.tagID";
+            OleDbCommand com = new OleDbCommand(accessQuery, con);
+            con.Open();
+            OleDbDataReader dr = com.ExecuteReader();
+            AutoCompleteStringCollection autotext = new AutoCompleteStringCollection();
+            while (dr.Read())
+            {
+                autotext.Add(dr.GetString(0));
+                autotext.Add(dr.GetString(1));
+            }
+            tbSearch.AutoCompleteMode = AutoCompleteMode.Suggest;
+            tbSearch.AutoCompleteSource = AutoCompleteSource.CustomSource;
+            tbSearch.AutoCompleteCustomSource = autotext;
+            con.Close();
         }
 
         private void groupBox1_Enter(object sender, EventArgs e)
@@ -82,33 +98,69 @@ namespace AeroMaterialHandlingDatabaseApplication
             tbViewLongDescription.Text = "";
             lblTags.Text = "";
 
-            //flp1.Controls.Clear();
+            flp1.Controls.Clear();
+
+            //Automatically start populating the flow planel
+            populateBroad();
+            populateItems();
+
+
+        }
+
+        private void populateBroad()
+        {
             //Establish connection to DB
             OleDbConnection con = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\\School\\Capstone\\Repository\\AMHDataBase\\Aero_Material_Handling.accdb");
 
             try
             {
                 con.Open();
-                //Create query to search keywords and tags from DB
-                string searchQuery = "select AMH_Entries.entryTitle, AMH_Entries.entryDescShort, AMH_Entries.entryDescLong, AMH_Tags.tagName, AMH_Attachments.attachmentFile " +
-                                     "from AMH_Attachments inner join((AMH_Tags inner join (AMH_Entries inner join AMH_Tag_Entry on AMH_Entries.entryID = AMH_Tag_Entry.entryID)" +
-                                     "on AMH_Tags.tagID = AMH_Tag_Entry.tagID) inner join AMH_Attachment_Entry on AMH_Entries.entryID = AMH_Attachment_Entry.entryID) " +
-                                     "on AMH_Attachments.attachmentID = AMH_Attachment_Entry.attachmentID where entryTitle = '" + tbSearch.Text + "'";
+
+                string searchQuery = "select entryTitle, entryDescShort, entryDescLong FROM AMH_entries WHERE entryTitle LIKE '%" + tbSearch.Text + "%'";
+
 
                 OleDbCommand com = new OleDbCommand(searchQuery, con);
 
                 OleDbDataReader accessReader = com.ExecuteReader();
-                //Local variable used to read data from DB
+                //Populates the broad view(right side) with data related to the search
                 while (accessReader.Read())
                 {
                     lbViewTitle.Text = accessReader.GetValue(0).ToString();
                     tbViewShortDescription.Text = accessReader.GetValue(1).ToString();
                     tbViewLongDescription.Text = accessReader.GetValue(2).ToString();
-                    lblTags.Text = accessReader.GetValue(3).ToString();
                 }
 
-                accessReader.Close();
                 com.Dispose();
+                accessReader.Dispose();
+                accessReader.Close();
+                con.Close();
+            }
+            catch (OleDbException ex)
+            {
+                MessageBox.Show(ex.Message);
+            }//End catch
+            Console.Read();
+
+            try
+            {
+                con.Open();
+                //Create query to search entry title and tags from DB
+                string searchQuery = "select AMH_Tags.tagName " +
+                                     "from AMH_Tags inner join (AMH_Entries inner join AMH_Tag_Entry on AMH_Entries.entryID = AMH_Tag_Entry.entryID) " +
+                                     "on AMH_Tags.tagID = AMH_Tag_Entry.tagID where entryTitle LIKE '%" + tbSearch.Text + "%'";
+
+                OleDbCommand com = new OleDbCommand(searchQuery, con);
+
+                OleDbDataReader accessReader = com.ExecuteReader();
+                //Populates the broad view(right side) with data related to the search
+                while (accessReader.Read())
+                {
+                    lblTags.Text = accessReader.GetValue(0).ToString();
+                }
+
+                com.Dispose();
+                accessReader.Dispose();
+                accessReader.Close();
                 con.Close();
             }//End try
             catch (OleDbException ex)
@@ -117,13 +169,7 @@ namespace AeroMaterialHandlingDatabaseApplication
             }//End catch
             Console.Read();
 
-            //Automatically start populating the flow planel
-            populateItems();
-
-
         }
-
-
 
         //Poplulate the flowpanel left side
         private void populateItems()
@@ -133,21 +179,20 @@ namespace AeroMaterialHandlingDatabaseApplication
             //Create connection to DB
             OleDbConnection con = new OleDbConnection(@"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=D:\\School\\Capstone\\Repository\\AMHDataBase\\Aero_Material_Handling.accdb");
             //Create query to pull data from DB
-            string searchQuery = "select DISTINCT *, AMH_Tags.tagName " +
-                                 "from AMH_Tags inner join (AMH_Entries inner join AMH_Tag_Entry on AMH_Entries.entryID = AMH_Tag_Entry.entryID)" +
-                                 "on AMH_Tags.tagID = AMH_Tag_Entry.tagID  " +
-                                 "where entryTitle LIKE '%" + tbSearch.Text + "%'";
+            string searchQuery = "select AMH_Entries.entryTitle, AMH_Entries.entryDescShort, AMH_Tags.tagName " +
+                                "from AMH_Tags inner join (AMH_Entries inner join AMH_Tag_Entry on AMH_Entries.entryID = AMH_Tag_Entry.entryID)" +
+                                "on AMH_Tags.tagID = AMH_Tag_Entry.tagID  " +
+                                "where entryTitle LIKE '%" + tbSearch.Text + "%'";
 
             con.Open();
             OleDbCommand com = new OleDbCommand(searchQuery, con);
             OleDbDataAdapter da = new OleDbDataAdapter(searchQuery, con);
             OleDbDataReader accessReader = com.ExecuteReader();
-            DataTable results = new DataTable();
-            da.Fill(results);
-            MessageBox.Show(results.Rows.Count.ToString());
 
             string builder = "";
 
+            //This is where you could add more than one results I think
+            //The search Query only pulls one result and we havent figured out the way to add different results into different list items and insert them into flp1
             for (int i = 0; i < listItems.Length - 1; i++)
             {
                 while (accessReader.Read())
@@ -156,7 +201,7 @@ namespace AeroMaterialHandlingDatabaseApplication
                     listItems[i] = new ListItem();
                     listItems[i].Title = accessReader[0].ToString();
                     listItems[i].shortDesc = accessReader[1].ToString();
-                    builder += "  " + accessReader[2].ToString();
+                    builder += "  " + accessReader[2].ToString();//string builder holds the tags as they come in from the accessReader
                     listItems[i].Tags = builder;
                 }
                 lblTags.Text = builder;
@@ -168,9 +213,9 @@ namespace AeroMaterialHandlingDatabaseApplication
                 }
                 else
                 {
-                    flp1.Controls.AddRange(listItems);
+                    flp1.Controls.Add(listItems[i]);
                 }
-                accessReader.NextResult();
+                accessReader.NextResult(); //This line is what grabs the next tag
             }
             accessReader.Close();
             com.Dispose();
@@ -203,26 +248,6 @@ namespace AeroMaterialHandlingDatabaseApplication
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            //byte[] ImageByte = null;
-            //MemoryStream MemStream = null;
-
-            //OleDbConnection con = new OleDbConnection();
-            //con.ConnectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=C:\Users\pc\OneDrive\Aero_Material_Handling.accdb";
-
-            //con.Open();
-            //OleDbCommand command = new OleDbCommand();
-            //command.Connection = con;
-            //string sql = "SELECT AMH_Entries.entryTitle, AMH_Attachments.attachmentFile " +
-            //             "FROM AMH_Attachments INNER JOIN(AMH_Entries INNER JOIN AMH_Attachment_Entry " +
-            //             "ON AMH_Entries.entryID = AMH_Attachment_Entry.entryID) " +
-            //             "ON AMH_Attachments.attachmentID = AMH_Attachment_Entry.attachmentID where entryTitle = '" + tbSearch.Text + "'";
-            //OleDbCommand vcom = new OleDbCommand(sql, con);
-
-            //ImageByte = (byte[])vcom.ExecuteScalar();
-            //MemStream = new MemoryStream(ImageByte);
-            //pictureBox1.Image = Image.FromStream(MemStream);
-
-            //con.Close();
         }
     }
 }
