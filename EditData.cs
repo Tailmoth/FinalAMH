@@ -11,6 +11,10 @@ using System.Data.OleDb;
 using System.Threading;
 using System.IO;
 using System.Diagnostics;
+/*
+ * This page is designed to make a new entry and store it onto the database as of now it properly stores the information and tags.
+ * it also store attachments in the database but does not properly tie them to the entrey
+ */
 
 
 namespace AeroMaterialHandlingDatabaseApplication
@@ -58,17 +62,8 @@ namespace AeroMaterialHandlingDatabaseApplication
             }
             return ret;
         }
-        private void textBox3_TextChanged(object sender, EventArgs e)
-        {
-            //hello world
 
-        }
-
-        private void label2_Click(object sender, EventArgs e)
-        {
-
-        }
-
+        //this saves the entry when the user choses to save the file
         private void btSave_Click(object sender, EventArgs e)
         {
             
@@ -81,6 +76,7 @@ namespace AeroMaterialHandlingDatabaseApplication
                                                 "on AMH_Entries.entryID = AMH_Attachment_Entry.entryID where entryTitle = @entryTitle", con);
 
 
+           //This gets all the text and attachmentes entered by the user.
             cmd.Parameters.AddWithValue("@entryTitle", tbEditTitle.Text.ToLower());
             cmd.Parameters.AddWithValue("@entryDescShort", tbEditShortDesc.Text.ToLower());
             cmd.Parameters.AddWithValue("@entryDescLong", tbEditLongDesc.Text.ToLower());
@@ -92,6 +88,7 @@ namespace AeroMaterialHandlingDatabaseApplication
             con.Open();
             OleDbDataReader dr = cmd.ExecuteReader();
             
+            //This section is to check if the entry already exist by finding a title with a matching name compared to the one the user types in the tilte text box
             try
             {
                 if (dr.HasRows)
@@ -134,6 +131,7 @@ namespace AeroMaterialHandlingDatabaseApplication
                     }
                 }
             }
+            //should there be a issue making a new entry this will inform the user that the entry was not added
             catch (Exception)
             {
                 MessageBox.Show("Error inserting records.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -142,7 +140,8 @@ namespace AeroMaterialHandlingDatabaseApplication
             {
                 MessageBox.Show("Entry saved.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-            //this code will get entryID and tagID then insert them into associative table
+            
+            //This will tie the tags to the entry's title, allowing the entry to be searched via its tags.
             string currentEntryID = "";
             try
             {
@@ -192,7 +191,7 @@ namespace AeroMaterialHandlingDatabaseApplication
 
             con.Close();
             con.Open();
-            //loop through all the tags and save them with the entryID
+            //loop through all the tags and tie them with the entryID
             for (int x = 0; x < lbTagList.Items.Count - 1; x++)
             {
                 try
@@ -208,7 +207,7 @@ namespace AeroMaterialHandlingDatabaseApplication
                     MessageBox.Show(err.ToString());
                 }
             }
-
+            //clears the text boxes after properly storing the new entry making it easier to add multiple new entries at a time
             tbEditAddTags.Clear();
             tbEditLongDesc.Clear();
             tbEditShortDesc.Clear();
@@ -218,10 +217,9 @@ namespace AeroMaterialHandlingDatabaseApplication
             if (con.State == ConnectionState.Open)
                 con.Close();
             this.Close();
-
-
         }
         
+       //Allows the user want to clear their entry and start from the begining 
         private void btClear_Click(object sender, EventArgs e)
         {
             tbEditAddTags.Clear();
@@ -231,30 +229,8 @@ namespace AeroMaterialHandlingDatabaseApplication
             lbTagList.Items.Clear();
             pbRegister.Image = null;
         }
-        
-        private void btExit_Click(object sender, EventArgs e)
-        {
-            this.Close();
-            
-
-        }
-
-        private void pbRegister_Click(object sender, EventArgs e)
-        {
-            AllowDrop = true;
-        }
-
-        private void label16_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void fEditPage_Load(object sender, EventArgs e)
-        {
-           
-
-        }
-
+ 
+        //Allows the user to remove undesired tags with the entry before submission
         private void btEditDeleteTag_Click(object sender, EventArgs e)
         {
             //Deletes tags from listbox
@@ -265,11 +241,7 @@ namespace AeroMaterialHandlingDatabaseApplication
 
         }
 
-        private void btEditAdd_Click(object sender, EventArgs e)
-        {
-            
-        }
-
+        //Allows the user to add the tag typed in the textbox intothe list box so the user 
         private void btTagAdd_Click(object sender, EventArgs e)
         {          
             string currentTag = tbEditAddTags.Text;
@@ -279,34 +251,7 @@ namespace AeroMaterialHandlingDatabaseApplication
             tbEditAddTags.Focus();
 
         }
-
-        private void btEditAddImage_Click(object sender, EventArgs e)
-        {           
-           
-
-        }
-
-        private void groupBox1_Enter(object sender, EventArgs e)
-        {
-           
-        }
-
-        private void tbEditAddTags_Enter(object sender, EventArgs e)
-        {
-            
-
-        }
-
-        private void button1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void groupBox1_DragDrop(object sender, DragEventArgs e)
-        {
-
-        }
-
+        // all the code bellow here until the next comment are to make drag and drop workallow the user to add attachments via drap and drop method.
         private void gbDragDrop_DragEnter(object sender, DragEventArgs e)
         {
             e.Effect = DragDropEffects.Copy;
@@ -364,7 +309,7 @@ namespace AeroMaterialHandlingDatabaseApplication
             else
                 e.Effect = DragDropEffects.None;
         }
-
+        //removes a attachment added to the list by user.
         private void btEditRemove_Click(object sender, EventArgs e)
         {
             //Deletes item from the drag and drop listbox
@@ -372,16 +317,6 @@ namespace AeroMaterialHandlingDatabaseApplication
             {
                 lbDragDrop.Items.Remove(lbDragDrop.SelectedItems[0]);
             }
-        }
-
-        private void gbDragDrop_Enter(object sender, EventArgs e)
-        {
-           
-        }
-
-        private void lbDragDrop_SelectedIndexChanged(object sender, EventArgs e)
-        {
-
         }
     }
 }

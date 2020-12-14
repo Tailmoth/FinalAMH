@@ -42,8 +42,8 @@
             this.tbEditAddTags = new System.Windows.Forms.TextBox();
             this.btTagAdd = new System.Windows.Forms.Button();
             this.gbDragDrop = new System.Windows.Forms.GroupBox();
-            this.lbDragDrop = new System.Windows.Forms.ListBox();
             this.label3 = new System.Windows.Forms.Label();
+            this.lbDragDrop = new System.Windows.Forms.ListBox();
             this.btEditRemove = new System.Windows.Forms.Button();
             this.btEditAdd = new System.Windows.Forms.Button();
             this.btEditDeleteTag = new System.Windows.Forms.Button();
@@ -63,6 +63,7 @@
             this.tbEditTitle.Name = "tbEditTitle";
             this.tbEditTitle.Size = new System.Drawing.Size(264, 38);
             this.tbEditTitle.TabIndex = 1;
+
             // 
             // tbEditShortDesc
             // 
@@ -133,7 +134,7 @@
             this.btEditExit.TabIndex = 38;
             this.btEditExit.Text = "Exit";
             this.btEditExit.UseVisualStyleBackColor = true;
-            this.btEditExit.Click += new System.EventHandler(this.btExit_Click);
+
             // 
             // label15
             // 
@@ -154,7 +155,7 @@
             this.label16.Size = new System.Drawing.Size(226, 31);
             this.label16.TabIndex = 40;
             this.label16.Text = "Long Description:";
-            this.label16.Click += new System.EventHandler(this.label16_Click);
+
             // 
             // tbEditAddTags
             // 
@@ -184,10 +185,19 @@
             this.gbDragDrop.Size = new System.Drawing.Size(229, 324);
             this.gbDragDrop.TabIndex = 44;
             this.gbDragDrop.TabStop = false;
-            this.gbDragDrop.DragDrop += new System.Windows.Forms.DragEventHandler(this.groupBox1_DragDrop);
             this.gbDragDrop.DragEnter += new System.Windows.Forms.DragEventHandler(this.gbDragDrop_DragEnter);
             this.gbDragDrop.DragOver += new System.Windows.Forms.DragEventHandler(this.gbDragDrop_DragOver);
-            this.gbDragDrop.Enter += new System.EventHandler(this.gbDragDrop_Enter);
+
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
+            this.label3.Location = new System.Drawing.Point(41, 15);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(112, 20);
+            this.label3.TabIndex = 1;
+            this.label3.Text = "Drag files here";
             // 
             // lbDragDrop
             // 
@@ -199,16 +209,6 @@
             this.lbDragDrop.TabIndex = 6;
             this.lbDragDrop.DragDrop += new System.Windows.Forms.DragEventHandler(this.lbDragDrop_DragDrop);
             this.lbDragDrop.DragEnter += new System.Windows.Forms.DragEventHandler(this.lbDragDrop_DragEnter);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("Microsoft Sans Serif", 12F);
-            this.label3.Location = new System.Drawing.Point(41, 15);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(112, 20);
-            this.label3.TabIndex = 1;
-            this.label3.Text = "Drag files here";
             // 
             // btEditRemove
             // 
@@ -230,7 +230,6 @@
             this.btEditAdd.TabIndex = 46;
             this.btEditAdd.Text = "Add";
             this.btEditAdd.UseVisualStyleBackColor = true;
-            this.btEditAdd.Click += new System.EventHandler(this.btEditAdd_Click);
             // 
             // btEditDeleteTag
             // 
@@ -252,7 +251,6 @@
             this.btEditAddImage.TabIndex = 48;
             this.btEditAddImage.Text = "Add Image";
             this.btEditAddImage.UseVisualStyleBackColor = true;
-            this.btEditAddImage.Click += new System.EventHandler(this.btEditAddImage_Click);
             // 
             // lbTagList
             // 
@@ -264,7 +262,6 @@
             // 
             // pbLogo
             // 
-            this.pbLogo.Image = global::AeroMaterialHandlingDatabaseApplication.Properties.Resources.LOGO_DARK_GRAY;
             this.pbLogo.Location = new System.Drawing.Point(88, 394);
             this.pbLogo.Name = "pbLogo";
             this.pbLogo.Size = new System.Drawing.Size(164, 139);
@@ -281,7 +278,6 @@
             this.pbRegister.Size = new System.Drawing.Size(221, 194);
             this.pbRegister.TabIndex = 10;
             this.pbRegister.TabStop = false;
-            this.pbRegister.Click += new System.EventHandler(this.pbRegister_Click);
             this.pbRegister.DragDrop += new System.Windows.Forms.DragEventHandler(this.pbRegister_DragDrop);
             this.pbRegister.DragEnter += new System.Windows.Forms.DragEventHandler(this.pbRegister_DragEnter);
             // 
@@ -315,7 +311,6 @@
             this.Name = "fEditPage";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Edit Page";
-            this.Load += new System.EventHandler(this.fEditPage_Load);
             this.gbDragDrop.ResumeLayout(false);
             this.gbDragDrop.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pbLogo)).EndInit();
